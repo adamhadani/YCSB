@@ -25,6 +25,11 @@
 		<antcall target="dbcompile"/>
 	</target>
    	
+   	<target name="dbcompile-cassandra-0.6.5" depends="compile">
+		<property name="db.dir" value="db/cassandra-0.6.5"/>
+		<antcall target="dbcompile"/>
+	</target>
+   	
    	<target name="dbcompile-cassandra-0.7" depends="compile">
 		<property name="db.dir" value="db/cassandra-0.7"/>
 		<antcall target="dbcompile"/>
@@ -32,6 +37,11 @@
    	
    	<target name="dbcompile-hbase" depends="compile">
 		<property name="db.dir" value="db/hbase"/>
+		<antcall target="dbcompile"/>
+	</target>
+
+   	<target name="dbcompile-hbase-0.20.6" depends="compile">
+		<property name="db.dir" value="db/hbase-0.20.6"/>
 		<antcall target="dbcompile"/>
 	</target>
 

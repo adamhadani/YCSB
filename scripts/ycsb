@@ -10,16 +10,16 @@ YCSB_HOME=`dirname $SCRIPT`/..
 
 # determine database or echo usage
 case $1 in
-	'cassandra6')
+	'cassandra-0.6.5')
 		DB_CLIENT=com.yahoo.ycsb.db.CassandraClient6
-		DB_HOME=$YCSB_HOME/db/cassandra-0.6
+		DB_HOME=$YCSB_HOME/db/$1
 		;;
-	'hbase')
+	'hbase-0.20.6')
 		DB_CLIENT=com.yahoo.ycsb.db.HbaseClient
-		DB_HOME=$YCSB_HOME/db/hbase
+		DB_HOME=$YCSB_HOME/db/$1
 		;;
 	*)
-		echo "${SCRIPT##*/} [ cassandra6 | hbase ] other_options..."
+		echo "${SCRIPT##*/} [ cassandra-0.6.5 | hbase-0.20.6 ] other_options..."
 		exit 0
 		;;
 esac
