@@ -15,7 +15,7 @@ case $1 in
 		DB_HOME=$YCSB_HOME/db/$1
 		;;
 	'hbase-0.20.6')
-		DB_CLIENT=com.yahoo.ycsb.db.HbaseClient
+		DB_CLIENT=com.yahoo.ycsb.db.HBaseClient
 		DB_HOME=$YCSB_HOME/db/$1
 		;;
 	*)
