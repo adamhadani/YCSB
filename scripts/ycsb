@@ -1,4 +1,8 @@
 #!/bin/bash
+function usage {
+	echo "${SCRIPT##*/} [ cassandra-0.6.5 | hbase-0.20.6 ] other_options..."
+	exit 0
+}
 
 # determine ycsb home
 if [ -h $0 ]; then
@@ -19,8 +23,7 @@ case $1 in
 		DB_HOME=$YCSB_HOME/db/$1
 		;;
 	*)
-		echo "${SCRIPT##*/} [ cassandra-0.6.5 | hbase-0.20.6 ] other_options..."
-		exit 0
+		usage
 		;;
 esac
 # discard first command line argument
@@ -32,5 +35,5 @@ for file in `ls $DB_HOME/lib/*.jar`; do
 	CLASSPATH=$CLASSPATH:$file
 done
 
-echo "java -cp $CLASSPATH -db $DB_CLIENT $*"
+echo "java -cp $CLASSPATH com.yahoo.ycsb.Client -db $DB_CLIENT $*"
 java -cp $CLASSPATH com.yahoo.ycsb.Client -db $DB_CLIENT $*
