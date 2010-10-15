@@ -18,6 +18,8 @@
 package com.yahoo.ycsb;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -89,6 +91,16 @@ public class DBWrapper extends DB
 		_measurements.measure("READ",(int)(en-st));
 		_measurements.reportReturnCode("READ",res);
 		return res;
+	}
+
+	@Override
+	public int readMultiple(String table, Set<String> keys, Set<String> fields, List<Map<String, String>> result) {
+		long startTime = System.currentTimeMillis();
+		int returnCode = _db.readMultiple(table, keys, fields, result);
+		long endTime = System.currentTimeMillis();
+		_measurements.measure("READ_MULTIPLE", (int)(endTime - startTime));
+		_measurements.reportReturnCode("READ_MULTIPLE", returnCode);
+		return returnCode;
 	}
 
 	/**

@@ -15,7 +15,7 @@ YCSB_HOME=`dirname $SCRIPT`/..
 # determine database or echo usage
 case $1 in
 	'cassandra-0.6.5')
-		DB_CLIENT=com.yahoo.ycsb.db.CassandraClient6
+		DB_CLIENT=com.yahoo.ycsb.db.CassandraClient6_5
 		DB_HOME=$YCSB_HOME/db/$1
 		;;
 	'hbase-0.20.6')

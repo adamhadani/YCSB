@@ -29,8 +29,12 @@ import com.yahoo.ycsb.generator.UniformIntegerGenerator;
 import com.yahoo.ycsb.generator.ZipfianGenerator;
 import com.yahoo.ycsb.measurements.Measurements;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -45,11 +49,14 @@ import java.util.Vector;
  * <LI><b>readallfields</b>: should reads read all fields (true) or just one (false) (default: true)
  * <LI><b>writeallfields</b>: should updates and read/modify/writes update all fields (true) or just one (false) (default: false)
  * <LI><b>readproportion</b>: what proportion of operations should be reads (default: 0.95)
+ * <LI><b>readmultipleproportion</b>: what proportion of operations should be read-multiple requests (default: 0)
  * <LI><b>updateproportion</b>: what proportion of operations should be updates (default: 0.05)
  * <LI><b>insertproportion</b>: what proportion of operations should be inserts (default: 0)
  * <LI><b>scanproportion</b>: what proportion of operations should be scans (default: 0)
  * <LI><b>readmodifywriteproportion</b>: what proportion of operations should be read a record, modify it, write it back (default: 0)
  * <LI><b>requestdistribution</b>: what distribution should be used to select the records to operate on - uniform, zipfian or latest (default: uniform)
+ * <LI><b>maxreadmultiplesize</b>: for read-multiple requests, what is the maximum number of records to request (default: 100)
+ * <LI><b>readmultiplesizedistribution</b>: for read-multiple requests, what distribution should be used to choose the number of records requested; for each scan, between 1 and maxreadmultiplesize (default: uniform)
  * <LI><b>maxscanlength</b>: for scans, what is the maximum number of records to scan (default: 1000)
  * <LI><b>scanlengthdistribution</b>: for scans, what distribution should be used to choose the number of records to scan, for each scan, between 1 and maxscanlength (default: uniform)
  * <LI><b>insertorder</b>: should records be inserted in order by key ("ordered"), or in hashed order ("hashed") (default: hashed)
@@ -57,6 +64,8 @@ import java.util.Vector;
  */
 public class CoreWorkload extends Workload
 {
+	public static final String UNIFORM_DISTRIBUTION = "uniform";
+	public static final String ZIPFIAN_DISTRIBUTION = "zipfian";
 
 	/**
 	 * The name of the database table to run queries against.
@@ -131,6 +140,21 @@ public class CoreWorkload extends Workload
 	public static final String READ_PROPORTION_PROPERTY_DEFAULT="0.95";
 
 	/**
+	 * The name of the property for the proportion of transactions that are read-multiple requests.
+	 */
+	public static final String READ_MULTIPLE_PROPORTION_PROPERTY="readmultipleproportion";
+
+	/**
+	 * The default proportion of transaction that are read-multiple requests.
+	 */
+	public static final String READ_MULTIPLE_PROPORTION_PROPERTY_DEFAULT = "0";
+
+	/**
+	 * Internal READ_MULTIPLE key.  Currently used by {@link #operationchooser}.
+	 */
+	private static final String READ_MULTIPLE_KEY = "READ_MULTIPLE";
+
+	/**
 	 * The name of the property for the proportion of transactions that are updates.
 	 */
 	public static final String UPDATE_PROPORTION_PROPERTY="updateproportion";
@@ -181,6 +205,26 @@ public class CoreWorkload extends Workload
 	public static final String REQUEST_DISTRIBUTION_PROPERTY_DEFAULT="uniform";
 
 	/**
+	 * The name of the property for the max read-multiple request size (number of records)
+	 */
+	public static final String MAX_READ_MULTIPLE_SIZE_PROPERTY = "maxreadmultiplesize";
+	
+	/**
+	 * The default max read-multiple size.
+	 */
+	public static final String MAX_READ_MULTIPLE_SIZE_DEFAULT = "100";
+	
+	/**
+	 * The name of the property for the read-multiple request size distribution. Options are "uniform" and "zipfian" (favoring short scans)
+	 */
+	public static final String READ_MULTIPLE_SIZE_DISTRIBUTION_PROPERTY = "readmultiplesizedistribution";
+	
+	/**
+	 * The default read-multiple request size distribution (uniform).
+	 */
+	public static final String READ_MULTIPLE_SIZE_DISTRIBUTION_DEFAULT = UNIFORM_DISTRIBUTION;
+
+	/**
 	 * The name of the property for the max scan length (number of records)
 	 */
 	public static final String MAX_SCAN_LENGTH_PROPERTY="maxscanlength";
@@ -199,7 +243,7 @@ public class CoreWorkload extends Workload
 	 * The default max scan length.
 	 */
 	public static final String SCAN_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT="uniform";
-	
+
 	/**
 	 * The name of the property for the order to insert records. Options are "ordered" or "hashed"
 	 */
@@ -221,6 +265,8 @@ public class CoreWorkload extends Workload
 	CounterGenerator transactioninsertkeysequence;
 	
 	IntegerGenerator scanlength;
+
+	IntegerGenerator readMultipleSizeGenerator;
 	
 	boolean orderedinserts;
 
@@ -236,12 +282,15 @@ public class CoreWorkload extends Workload
 		fieldcount=Integer.parseInt(p.getProperty(FIELD_COUNT_PROPERTY,FIELD_COUNT_PROPERTY_DEFAULT));
 		fieldlength=Integer.parseInt(p.getProperty(FIELD_LENGTH_PROPERTY,FIELD_LENGTH_PROPERTY_DEFAULT));
 		double readproportion=Double.parseDouble(p.getProperty(READ_PROPORTION_PROPERTY,READ_PROPORTION_PROPERTY_DEFAULT));
+		final double readMultipleProportion = Double.parseDouble(p.getProperty(READ_MULTIPLE_PROPORTION_PROPERTY, READ_MULTIPLE_PROPORTION_PROPERTY_DEFAULT));
 		double updateproportion=Double.parseDouble(p.getProperty(UPDATE_PROPORTION_PROPERTY,UPDATE_PROPORTION_PROPERTY_DEFAULT));
 		double insertproportion=Double.parseDouble(p.getProperty(INSERT_PROPORTION_PROPERTY,INSERT_PROPORTION_PROPERTY_DEFAULT));
 		double scanproportion=Double.parseDouble(p.getProperty(SCAN_PROPORTION_PROPERTY,SCAN_PROPORTION_PROPERTY_DEFAULT));
 		double readmodifywriteproportion=Double.parseDouble(p.getProperty(READMODIFYWRITE_PROPORTION_PROPERTY,READMODIFYWRITE_PROPORTION_PROPERTY_DEFAULT));
 		recordcount=Integer.parseInt(p.getProperty(Client.RECORD_COUNT_PROPERTY));
 		String requestdistrib=p.getProperty(REQUEST_DISTRIBUTION_PROPERTY,REQUEST_DISTRIBUTION_PROPERTY_DEFAULT);
+		final int maxReadMultipleSize = Integer.parseInt(p.getProperty(MAX_READ_MULTIPLE_SIZE_PROPERTY, MAX_READ_MULTIPLE_SIZE_DEFAULT));
+		final String readMultipleDistribution = p.getProperty(READ_MULTIPLE_SIZE_DISTRIBUTION_PROPERTY, READ_MULTIPLE_SIZE_DISTRIBUTION_DEFAULT);
 		int maxscanlength=Integer.parseInt(p.getProperty(MAX_SCAN_LENGTH_PROPERTY,MAX_SCAN_LENGTH_PROPERTY_DEFAULT));
 		String scanlengthdistrib=p.getProperty(SCAN_LENGTH_DISTRIBUTION_PROPERTY,SCAN_LENGTH_DISTRIBUTION_PROPERTY_DEFAULT);
 		
@@ -266,6 +315,10 @@ public class CoreWorkload extends Workload
 			operationchooser.addValue(readproportion,"READ");
 		}
 
+		if (readMultipleProportion > 0) {
+			operationchooser.addValue(readMultipleProportion, READ_MULTIPLE_KEY);
+		}
+		
 		if (updateproportion>0)
 		{
 			operationchooser.addValue(updateproportion,"UPDATE");
@@ -315,7 +368,17 @@ public class CoreWorkload extends Workload
 		}
 
 		fieldchooser=new UniformIntegerGenerator(0,fieldcount-1);
-		
+
+		if (UNIFORM_DISTRIBUTION.equals(readMultipleDistribution)) {
+			readMultipleSizeGenerator = new UniformIntegerGenerator(1, maxReadMultipleSize);
+		}
+		else if (ZIPFIAN_DISTRIBUTION.equals(readMultipleDistribution)) {
+			readMultipleSizeGenerator = new ZipfianGenerator(1, maxReadMultipleSize);			
+		}
+		else {
+			throw new WorkloadException("Distribution \"" + readMultipleDistribution + "\" not allowed for read-multiple request size");
+		}
+
 		if (scanlengthdistrib.compareTo("uniform")==0)
 		{
 			scanlength=new UniformIntegerGenerator(1,maxscanlength);
@@ -371,6 +434,9 @@ public class CoreWorkload extends Workload
 		{
 			doTransactionRead(db);
 		}
+		else if (READ_MULTIPLE_KEY.equals(op)) {
+			doTransationReadMultiple(db);
+		}
 		else if (op.compareTo("UPDATE")==0)
 		{
 			doTransactionUpdate(db);
@@ -420,7 +486,17 @@ public class CoreWorkload extends Workload
 
 		db.read(table,keyname,fields,new HashMap<String,String>());
 	}
-	
+
+	public void doTransationReadMultiple(DB db)
+	{
+		final String keyName = getRandomKey();
+		db.readMultiple(
+			table, 
+			getRandomKeys(readMultipleSizeGenerator.nextInt()), 
+			getReadFields(), 
+			new ArrayList<Map<String,String>>());
+	}
+
 	public void doTransactionReadModifyWrite(DB db)
 	{
 		//choose a random key
@@ -571,5 +647,49 @@ public class CoreWorkload extends Workload
 			values.put(fieldkey,data);
 		}
 		db.insert(table,dbkey,values);
+	}
+
+	private Set<String> getRandomKeys(int quantity) {
+		if (quantity < 0) {
+			throw new IllegalArgumentException("Invalid quantity (" + quantity + ")");
+		}
+		final Set<String> keys = new HashSet<String>();
+		for (int count = 0; count < quantity; count++) {
+			keys.add(getRandomKey());
+		}
+		return keys;
+	}
+	
+	private String getRandomKey() {
+		int keyNumber;
+		do
+		{
+			keyNumber = keychooser.nextInt();
+		}
+		while (keyNumber > transactioninsertkeysequence.lastInt());
+		
+		if (!orderedinserts)
+		{
+			keyNumber = Utils.hash(keyNumber);
+		}
+		return createKey(keyNumber);
+	}
+	
+	private String createKey(int keyNumber) {
+		return "user" + keyNumber;
+	}
+
+	private Set<String> getReadFields() {
+		Set<String> fields = null;
+		if (!readallfields)
+		{
+			fields = new HashSet<String>();
+			fields.add(getRandomReadField());
+		}
+		return fields;
+	}
+
+	private String getRandomReadField() {
+		return "field" + fieldchooser.nextString();
 	}
 }

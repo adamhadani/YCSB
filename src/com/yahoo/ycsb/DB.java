@@ -18,6 +18,8 @@
 package com.yahoo.ycsb;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Vector;
@@ -92,6 +94,17 @@ public abstract class DB
 	 */
 	public abstract int read(String table, String key, Set<String> fields, HashMap<String,String> result);
 
+	/**
+	 * Reads multiple non-contiguous records from the database.  Each field/value pair from the result will be stored in a HashMap.
+	 * 
+	 * @param table The name of the table
+	 * @param key The record key of the record to read.
+	 * @param fields The list of fields to read, or null for all of them
+	 * @param result A List of HashMaps, where each HashMap is a set field/value pairs for one record
+	 * @return Zero on success, a non-zero error code on error or "not found".
+	 */
+	public abstract int readMultiple(String table, Set<String> keys, Set<String> fields, List<Map<String,String>> result);
+	
 	/**
 	 * Perform a range scan for a set of records in the database. Each field/value pair from the result will be stored in a HashMap.
 	 *

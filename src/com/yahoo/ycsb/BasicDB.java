@@ -18,6 +18,9 @@
 package com.yahoo.ycsb;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Enumeration;
@@ -122,7 +125,42 @@ public class BasicDB extends DB
 
 		return 0;
 	}
-	
+
+	@Override
+	public int readMultiple(String table, Set<String> keys, Set<String> fields, List<Map<String, String>> result) {
+		delay();
+
+		if (verbose)
+		{
+			final StringBuffer debugBuffer = new StringBuffer();
+			debugBuffer.append("READ MULTIPLE ");
+			debugBuffer.append(table);
+			debugBuffer.append(" keys [");
+			for (final Iterator<String> keyIterator = keys.iterator(); keyIterator.hasNext();) {
+				debugBuffer.append(keyIterator.next());
+				if (keyIterator.hasNext()) {
+					debugBuffer.append(", ");
+				}
+			}
+			debugBuffer.append("], fields [");
+			if (fields == null) {
+				debugBuffer.append("<all fields>");
+			}
+			else {
+				for (final Iterator<String> fieldIterator = fields.iterator(); fieldIterator.hasNext();) {
+					debugBuffer.append(fieldIterator.next());
+					if (fieldIterator.hasNext()) {
+						debugBuffer.append(", ");
+					}
+				}
+			}
+			debugBuffer.append(']');
+			System.out.println(debugBuffer.toString());
+		}
+
+		return 0;
+	}
+
 	/**
 	 * Perform a range scan for a set of records in the database. Each field/value pair from the result will be stored in a HashMap.
 	 *
