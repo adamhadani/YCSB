@@ -32,7 +32,6 @@ import com.yahoo.ycsb.measurements.Measurements;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -205,6 +204,16 @@ public class CoreWorkload extends Workload
 	public static final String REQUEST_DISTRIBUTION_PROPERTY_DEFAULT="uniform";
 
 	/**
+	 * The name of the property for the minimum read-multiple request size (number of records)
+	 */
+	public static final String MIN_READ_MULTIPLE_SIZE_PROPERTY = "minreadmultiplesize";
+	
+	/**
+	 * The default min read-multiple size.
+	 */
+	public static final String MIN_READ_MULTIPLE_SIZE_DEFAULT = "1";
+	
+	/**
 	 * The name of the property for the max read-multiple request size (number of records)
 	 */
 	public static final String MAX_READ_MULTIPLE_SIZE_PROPERTY = "maxreadmultiplesize";
@@ -289,6 +298,7 @@ public class CoreWorkload extends Workload
 		double readmodifywriteproportion=Double.parseDouble(p.getProperty(READMODIFYWRITE_PROPORTION_PROPERTY,READMODIFYWRITE_PROPORTION_PROPERTY_DEFAULT));
 		recordcount=Integer.parseInt(p.getProperty(Client.RECORD_COUNT_PROPERTY));
 		String requestdistrib=p.getProperty(REQUEST_DISTRIBUTION_PROPERTY,REQUEST_DISTRIBUTION_PROPERTY_DEFAULT);
+		final int minReadMultipleSize = Integer.parseInt(p.getProperty(MIN_READ_MULTIPLE_SIZE_PROPERTY, MIN_READ_MULTIPLE_SIZE_DEFAULT));
 		final int maxReadMultipleSize = Integer.parseInt(p.getProperty(MAX_READ_MULTIPLE_SIZE_PROPERTY, MAX_READ_MULTIPLE_SIZE_DEFAULT));
 		final String readMultipleDistribution = p.getProperty(READ_MULTIPLE_SIZE_DISTRIBUTION_PROPERTY, READ_MULTIPLE_SIZE_DISTRIBUTION_DEFAULT);
 		int maxscanlength=Integer.parseInt(p.getProperty(MAX_SCAN_LENGTH_PROPERTY,MAX_SCAN_LENGTH_PROPERTY_DEFAULT));
@@ -370,10 +380,10 @@ public class CoreWorkload extends Workload
 		fieldchooser=new UniformIntegerGenerator(0,fieldcount-1);
 
 		if (UNIFORM_DISTRIBUTION.equals(readMultipleDistribution)) {
-			readMultipleSizeGenerator = new UniformIntegerGenerator(1, maxReadMultipleSize);
+			readMultipleSizeGenerator = new UniformIntegerGenerator(minReadMultipleSize, maxReadMultipleSize);
 		}
 		else if (ZIPFIAN_DISTRIBUTION.equals(readMultipleDistribution)) {
-			readMultipleSizeGenerator = new ZipfianGenerator(1, maxReadMultipleSize);			
+			readMultipleSizeGenerator = new ZipfianGenerator(minReadMultipleSize, maxReadMultipleSize);			
 		}
 		else {
 			throw new WorkloadException("Distribution \"" + readMultipleDistribution + "\" not allowed for read-multiple request size");
