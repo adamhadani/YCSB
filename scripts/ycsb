@@ -12,20 +12,28 @@ else
 fi
 YCSB_HOME=`dirname $SCRIPT`/..
 
-# determine database or echo usage
+# determine database driver
 case $1 in
-	'cassandra-0.6.5')
+	cassandra*)
 		DB_CLIENT=com.yahoo.ycsb.db.CassandraClient6_5
-		DB_HOME=$YCSB_HOME/db/$1
 		;;
-	'hbase-0.20.6')
+	hbase*)
 		DB_CLIENT=com.yahoo.ycsb.db.HBaseClient
-		DB_HOME=$YCSB_HOME/db/$1
+		;;
+	membase*)
+		DB_CLIENT=com.yahoo.ycsb.db.MembaseClient
 		;;
 	*)
 		usage
 		;;
 esac
+
+# check that directory for specific database version exists
+DB_HOME=$YCSB_HOME/db/$1
+if [ ! -d $DB_HOME ]; then
+	usage
+fi
+
 # discard first command line argument
 shift
 
@@ -35,5 +43,6 @@ for file in `ls $DB_HOME/lib/*.jar`; do
 	CLASSPATH=$CLASSPATH:$file
 done
 
-echo "java -cp $CLASSPATH com.yahoo.ycsb.Client -db $DB_CLIENT $*"
-java -cp $CLASSPATH com.yahoo.ycsb.Client -db $DB_CLIENT $*
+CMD="java -cp $CLASSPATH com.yahoo.ycsb.Client -db $DB_CLIENT $*"
+echo $CMD
+$CMD
