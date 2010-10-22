@@ -43,8 +43,8 @@ public class MembaseClient extends DB
 		public static class Key {
 			public static final String DEBUG = "debug";
 			public static final String HOSTS = "hosts";
-			public static final String OPERATION_TIMEOUT_MILLIS = "operation.timeout.millis";
-			public static final String RECORD_EXPIRATION_SECONDS = "record.expiration.seconds";
+			public static final String OPERATION_TIMEOUT_MILLIS = "membase.operation.timeout.millis";
+			public static final String RECORD_EXPIRATION_SECONDS = "membase.record.expiration.seconds";
 		}
 
 		/**

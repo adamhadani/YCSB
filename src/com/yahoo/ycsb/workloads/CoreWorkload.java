@@ -54,6 +54,7 @@ import java.util.Vector;
  * <LI><b>scanproportion</b>: what proportion of operations should be scans (default: 0)
  * <LI><b>readmodifywriteproportion</b>: what proportion of operations should be read a record, modify it, write it back (default: 0)
  * <LI><b>requestdistribution</b>: what distribution should be used to select the records to operate on - uniform, zipfian or latest (default: uniform)
+ * <LI><b>minreadmultiplesize</b>: for read-multiple requests, what is the minimum number of records to request (default: 1)
  * <LI><b>maxreadmultiplesize</b>: for read-multiple requests, what is the maximum number of records to request (default: 100)
  * <LI><b>readmultiplesizedistribution</b>: for read-multiple requests, what distribution should be used to choose the number of records requested; for each scan, between 1 and maxreadmultiplesize (default: uniform)
  * <LI><b>maxscanlength</b>: for scans, what is the maximum number of records to scan (default: 1000)

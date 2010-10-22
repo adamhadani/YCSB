@@ -1,0 +1,30 @@
+workload=com.yahoo.ycsb.workloads.CoreWorkload
+threadcount=10
+target=850
+
+# insert
+recordcount=300000
+
+# test
+requestdistribution=zipfian
+# 5 minutes
+operationcount=255000
+##fieldcount=10
+##fieldlength=100
+##readallfields=true
+##writeallfields=false
+##insertorder=hashed
+
+readproportion=0.1
+readmultipleproportion=0.1
+updateproportion=0.8
+##insertproportion=0
+##scanproportion=0
+##readmodifywriteproportion=0
+
+##readmultiplesizedistribution=uniform
+minreadmultiplesize=50
+maxreadmultiplesize=100
+
+#membase
+membase.operation.timeout.millis=5000
