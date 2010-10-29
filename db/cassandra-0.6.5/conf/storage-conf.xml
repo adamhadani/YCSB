@@ -138,7 +138,7 @@
       <ReplicaPlacementStrategy>org.apache.cassandra.locator.RackUnawareStrategy</ReplicaPlacementStrategy>
 
       <!-- Number of replicas of the data -->
-      <ReplicationFactor>1</ReplicationFactor>
+      <ReplicationFactor>2</ReplicationFactor>
 
       <!--
        ~ EndPointSnitch: Setting this to the class that implements
@@ -202,7 +202,7 @@
    ~ of tokens around the hash space, especially for clusters with a small
    ~ number of nodes.
   -->
-  <InitialToken>0</InitialToken>
+  <InitialToken></InitialToken>
 
   <!--
    ~ Directories: Specify where Cassandra should store different data on
