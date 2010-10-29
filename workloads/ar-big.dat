@@ -1,0 +1,31 @@
+workload=com.yahoo.ycsb.workloads.CoreWorkload
+threadcount=64
+# (15,000,000 page views/day) * (5 operation/page view) / ((10 peak hours/day) * (60 minutes/hour) * (60 seconds/minute))
+target=2100
+
+# insert
+recordcount=150000000
+
+# test
+requestdistribution=zipfian
+# (6 hours) * (15,000,000 page views/day) * (5 operation/page view) / (10 peak hours/day)
+operationcount=45000000
+fieldcount=5
+fieldlength=10
+##readallfields=true
+##writeallfields=false
+##insertorder=hashed
+
+readproportion=0.1
+readmultipleproportion=0.1
+updateproportion=0.8
+##insertproportion=0
+##scanproportion=0
+##readmodifywriteproportion=0
+
+##readmultiplesizedistribution=uniform
+minreadmultiplesize=50
+maxreadmultiplesize=100
+
+#membase
+membase.operation.timeout.millis=5000

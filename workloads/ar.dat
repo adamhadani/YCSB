@@ -3,7 +3,7 @@ threadcount=10
 target=850
 
 # insert
-recordcount=300000
+recordcount=3000000
 
 # test
 requestdistribution=zipfian

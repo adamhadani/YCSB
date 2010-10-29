@@ -43,7 +43,7 @@
    ~ Otherwise, no data will be lost but you will incur a lot of unnecessary
    ~ I/O before your cluster starts up.)
   -->
-  <AutoBootstrap>true</AutoBootstrap>
+  <AutoBootstrap>false</AutoBootstrap>
 
   <!--
    ~ See http://wiki.apache.org/cassandra/HintedHandoff
@@ -105,7 +105,9 @@
        ~ Remember, when using caches as a percentage, they WILL grow with
        ~ your data set!
       -->
-      <ColumnFamily Name="data" CompareWith="UTF8Type"/>
+      <ColumnFamily Name="data" 
+                    CompareWith="UTF8Type"
+                    KeysCached="100%"/>
 <!--
       <ColumnFamily Name="Standard2" 
                     CompareWith="UTF8Type"
@@ -136,7 +138,7 @@
       <ReplicaPlacementStrategy>org.apache.cassandra.locator.RackUnawareStrategy</ReplicaPlacementStrategy>
 
       <!-- Number of replicas of the data -->
-      <ReplicationFactor>2</ReplicationFactor>
+      <ReplicationFactor>1</ReplicationFactor>
 
       <!--
        ~ EndPointSnitch: Setting this to the class that implements
@@ -146,7 +148,14 @@
        ~ and PropertyFileEndPointSnitch is available in contrib/.
       -->
       <EndPointSnitch>org.apache.cassandra.locator.EndPointSnitch</EndPointSnitch>
-        
+
+	<!--
+		avoid reading from slow hosts 
+	 -->
+<!--
+      <DynamicSnitch>true</DynamicSnitch>
+-->
+
     </Keyspace>
   </Keyspaces>
 
@@ -193,7 +202,7 @@
    ~ of tokens around the hash space, especially for clusters with a small
    ~ number of nodes.
   -->
-  <InitialToken></InitialToken>
+  <InitialToken>0</InitialToken>
 
   <!--
    ~ Directories: Specify where Cassandra should store different data on
@@ -204,7 +213,7 @@
   <DataFileDirectories>
       <DataFileDirectory>/var/lib/cassandra/data</DataFileDirectory>
   </DataFileDirectories>
-
+  <SavedCachesDirectory>/var/lib/cassandra/saved_caches</SavedCachesDirectory>
 
   <!--
    ~ Addresses of hosts that are deemed contact points. Cassandra nodes
@@ -212,7 +221,7 @@
    ~ the ring. You must change this if you are running multiple nodes!
   -->
   <Seeds>
-      <Seed>127.0.0.1</Seed>
+      <Seed></Seed>
   </Seeds>
 
 
@@ -238,7 +247,7 @@
    ~ (hostname, name resolution, etc), and the Right Thing is to use the
    ~ address associated with the hostname (it might not be).
   -->
-  <ListenAddress>localhost</ListenAddress>
+  <ListenAddress></ListenAddress>
   <!-- internal communications port -->
   <StoragePort>7000</StoragePort>
 
@@ -250,7 +259,7 @@
    ~ Leaving this blank has the same effect it does for ListenAddress,
    ~ (i.e. it will be based on the configured hostname of the node).
   -->
-  <ThriftAddress>localhost</ThriftAddress>
+  <ThriftAddress>0.0.0.0</ThriftAddress>
   <!-- Thrift RPC port (the port clients connect to). -->
   <ThriftPort>9160</ThriftPort>
   <!-- 
@@ -259,6 +268,9 @@
    ~ client-side, (framed and non-framed transports are not compatible).
   -->
   <ThriftFramedTransport>false</ThriftFramedTransport>
+<!--
+  <ThriftFramedTransportSizeInMB>15</ThriftFramedTransportSizeInMB>   
+-->
 
 
   <!--======================================================================-->
@@ -345,9 +357,9 @@
 
   <!--
    ~ Unlike most systems, in Cassandra writes are faster than reads, so
-   ~ you can afford more of those in parallel.  A good rule of thumb is 2
-   ~ concurrent reads per processor core.  Increase ConcurrentWrites to
-   ~ the number of clients writing at once if you enable CommitLogSync +
+   ~ you can afford more of those in parallel.  A good rule of thumb is
+   ~ 2(-4) concurrent reads per processor core.  Increase ConcurrentWrites
+   ~ tothe number of clients writing at once if you enable CommitLogSync +
    ~ CommitLogSyncDelay. -->
   <ConcurrentReads>8</ConcurrentReads>
   <ConcurrentWrites>32</ConcurrentWrites>
