@@ -45,8 +45,8 @@
 		<antcall target="dbcompile"/>
 	</target>
 
-   	<target name="dbcompile-hbase-0.89.20101026" depends="compile">
-		<property name="db.dir" value="db/hbase-0.89.20101026"/>
+   	<target name="dbcompile-hbase-0.91.20101130" depends="compile">
+		<property name="db.dir" value="db/hbase-0.91.20101130"/>
 		<antcall target="dbcompile"/>
 	</target>
 

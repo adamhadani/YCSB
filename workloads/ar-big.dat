@@ -7,7 +7,8 @@ target=2100
 recordcount=150000000
 
 # test
-requestdistribution=zipfian
+#requestdistribution=zipfian
+requestdistribution=uniform
 # (6 hours) * (15,000,000 page views/day) * (5 operation/page view) / (10 peak hours/day)
 operationcount=45000000
 fieldcount=5

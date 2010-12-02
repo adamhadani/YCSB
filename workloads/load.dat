@@ -1,2 +1,2 @@
-threadcount=100
-target=8000
+threadcount=250
+target=19000

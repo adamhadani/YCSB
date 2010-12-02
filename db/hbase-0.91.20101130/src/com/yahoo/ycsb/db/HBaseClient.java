@@ -239,6 +239,10 @@ public class HBaseClient extends com.yahoo.ycsb.DB
 			System.err.println("Error doing batch get: " + exception);
 			return ServerError;
 		}
+		catch (InterruptedException exception) {
+			System.err.println("Error doing batch get: " + exception);
+			return ServerError;
+		}
 		catch (ConcurrentModificationException exception) {
 			// do nothing for now...need to understand HBase concurrency model better
 			return ServerError;
